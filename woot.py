@@ -82,14 +82,20 @@ def main():
     # Convert the response to a json object to make it easier to work with
     json_response = r.json()
 
+    # Creating an empty list for returned urls later
+    link = []
+
     # Loop through the response and return what we are looking for
     for item in json_response['Items']:
         if "HOME/Bedding" in item['Categories'] and item['IsSoldOut'] == False:
-            link = item['Url']
+            link.append(item['Url'])
     
     # Email results matching our search criteria
     # TODO: Handle if more than one item is returned from API
-    send_mail(link)
+    # This will handle multiple results
+    # But it could also spam the user with emails
+    for url in link:
+        print(url)
 
 if __name__ == '__main__':
     main()
