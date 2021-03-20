@@ -1,11 +1,41 @@
 import requests
 import os
 import sys
+import argparse
 import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-#TODO: Args?
+
+# Get args from user
+parser = argparse.ArgumentParser(description="Searches woot.com for offers")
+parser.add_argument(
+    "-e",
+    "--email",
+    help="email address to send results to",
+    required=True
+)
+parser.add_argument(
+    "-f",
+    "--feed",
+    help="Feed to query items from",
+    choices=['All', 'Clearance', 'Computers', 'Electronics', 'Featured', 'Home', 'Gourmet', 'Shirts', 'Sports', 'Tools', 'Wootoff'],
+    required=True
+)
+parser.add_argument(
+    "-s",
+    "--sub",
+    help="Sub feed to filter. ex. Bedding for a search of Home/Bedding",
+    required=False
+)
+parser.add_argument(
+    "-c",
+    "--criteria",
+    help="Search criteia to filter results",
+    required=False
+)
+args = vars(parser.parse_args())
+
 
 def add_urls(data):
 
@@ -24,12 +54,13 @@ def add_urls(data):
 
     return template
 
+
 # This function was found on https://realpython.com/python-send-email/
 # and has only been modified slightly
 def send_mail(link):
 
-    sender_email = "matthewfonner@gmail.com"
-    receiver_email = "matthewfonner@gmail.com"
+    sender_email = args['email']
+    receiver_email = args['email']
 
     try:
         password = os.environ['EMAIL_KEY']
@@ -83,8 +114,14 @@ def send_mail(link):
 
 def main():
 
-    url = "https://developer.woot.com"
-    feed_name = "/feed/home"
+    api_base_url = "https://developer.woot.com/feed/"
+    api_endpoint = args['feed']
+
+    # Setting our search based on args provided
+    if args['sub']:
+        item_filter = args['feed'].upper()+"/"+args['sub']
+    else:
+        item_filter = args['feed']
 
     try:
         key = os.environ['WOOT_KEY']
@@ -92,7 +129,7 @@ def main():
         print('API key not found in environment variables.')
         sys.exit(1)
 
-    r = requests.get(url+feed_name, headers={"x-api-key": key})
+    r = requests.get(api_base_url+api_endpoint, headers={"x-api-key": key})
     
     # Ensure our API request succeeded 
     if r.status_code != 200:
@@ -108,7 +145,7 @@ def main():
     # Loop through the response
     # Add item titles and urls to our dictionary to email later 
     for item in json_response['Items']:
-        if "HOME/Bedding" in item['Categories'] and item['IsSoldOut'] == False:
+        if item_filter in item['Categories'] and item['IsSoldOut'] == False:
             urls[item['Url']] = item['Title']
     
     # Email results matching our search criteria
