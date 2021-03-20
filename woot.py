@@ -1,5 +1,6 @@
 import requests
 import os
+import sys
 import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -18,7 +19,7 @@ def send_mail(link):
         password = os.environ['EMAIL_KEY']
     except KeyError:
         print('Email key not found in environment variables')
-        exit(1)
+        sys.exit(1)
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "Woot has what you are looking for!"
@@ -69,14 +70,14 @@ def main():
         key = os.environ['WOOT_KEY']
     except KeyError:
         print('API key not found in environment variables.')
-        exit(1)
+        sys.exit(1)
 
     r = requests.get(url+feed_name, headers={"x-api-key": key})
     
     # Ensure our API request succeeded 
     if r.status_code != 200:
         print('GET failed with {}'.format(r.status_code)) 
-        exit(1)
+        sys.exit(1)
 
     # Convert the response to a json object to make it easier to work with
     json_response = r.json()
