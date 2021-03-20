@@ -85,10 +85,10 @@ def main():
     # Loop through the response and return what we are looking for
     for item in json_response['Items']:
         if "HOME/Bedding" in item['Categories'] and item['IsSoldOut'] == False:
-            print(item)
+            link = item['Url']
     
     # Email results matching our search criteria
-    link = "https://github.com"
+    # TODO: Handle if more than one item is returned from API
     send_mail(link)
 
 if __name__ == '__main__':
