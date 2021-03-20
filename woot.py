@@ -14,7 +14,9 @@ def add_urls(data):
 
     for key in data:
         html = """\
-               <a href="{}">{}</a> 
+
+               <li><a href="{}">{}</a></li>
+
         """.format(key, data[key])
 
         # Appending formatted html to template
@@ -43,16 +45,20 @@ def send_mail(link):
     # Create the plain-text and HTML version of your message
     text = """\
     Hi,
+
     I've found the following item(s) on Woot that match your search!
+
     {}
     """.format(link)
     html = """\
     <html>
       <body>
-        <p>Hi,<br>
-           I've found the following item(s) on Woot that match your search!<br>
-           {}
-        </p>
+        <p>Hi,</p>
+        <p>I've found the following item(s) on Woot that match your search!</p>
+        <ul>
+            {}
+        </ul>   
+        <p>Thanks for using woot-notify!</p>
       </body>
     </html>
     """.format(link)
