@@ -5,8 +5,22 @@ import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-#TODO: Return results only matching search criteria i.e. mattress 
 #TODO: Args?
+
+def add_urls(data):
+
+    # Creating an empty string for our html
+    template = """"""
+
+    for key in data:
+        html = """\
+               <a href="{}">{}</a> 
+        """.format(key, data[key])
+
+        # Appending formatted html to template
+        template+=html
+
+    return template
 
 # This function was found on https://realpython.com/python-send-email/
 # and has only been modified slightly
@@ -37,7 +51,7 @@ def send_mail(link):
       <body>
         <p>Hi,<br>
            I've found the following item(s) on Woot that match your search!<br>
-           <a href="{}">Woot!</a> 
+           {}
         </p>
       </body>
     </html>
@@ -82,20 +96,18 @@ def main():
     # Convert the response to a json object to make it easier to work with
     json_response = r.json()
 
-    # Creating an empty list for returned urls later
-    link = []
+    # Creating an empty dictionary for returned urls later
+    urls = {}
 
-    # Loop through the response and return what we are looking for
+    # Loop through the response
+    # Add item titles and urls to our dictionary to email later 
     for item in json_response['Items']:
         if "HOME/Bedding" in item['Categories'] and item['IsSoldOut'] == False:
-            link.append(item['Url'])
+            urls[item['Url']] = item['Title']
     
     # Email results matching our search criteria
-    # TODO: Handle if more than one item is returned from API
-    # This will handle multiple results
-    # But it could also spam the user with emails
-    for url in link:
-        print(url)
+    search_results = add_urls(urls)
+    send_mail(search_results)
 
 if __name__ == '__main__':
     main()
