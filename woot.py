@@ -118,10 +118,11 @@ def main():
     api_endpoint = args['feed']
 
     # Setting our search based on args provided
+    # TODO: not all feeds return the feed name in upper case, i.e. electronics
     if args['sub']:
         item_filter = args['feed'].upper()+"/"+args['sub']
     else:
-        item_filter = args['feed']
+        item_filter = args['feed'].upper()
 
     try:
         key = os.environ['WOOT_KEY']
@@ -145,12 +146,20 @@ def main():
     # Loop through the response
     # Add item titles and urls to our dictionary to email later 
     for item in json_response['Items']:
-        if item_filter in item['Categories'] and item['IsSoldOut'] == False:
-            urls[item['Url']] = item['Title']
+        if args['criteria']:
+            if item_filter in item['Categories'] and item['IsSoldOut'] == False and args['criteria'] in item['Title']:
+                urls[item['Url']] = item['Title']
+        else:
+            if item_filter in item['Categories'] and item['IsSoldOut'] == False:
+                urls[item['Url']] = item['Title']
     
-    # Email results matching our search criteria
-    search_results = add_urls(urls)
-    send_mail(search_results)
+    # Email results matching our search criteria if present
+    # TODO: Maybe track empty results in a log or something?
+    if urls:
+        search_results = add_urls(urls)
+        send_mail(search_results)
+    else: 
+        pass
 
 if __name__ == '__main__':
     main()
