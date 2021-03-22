@@ -19,7 +19,7 @@ parser.add_argument(
     "-f",
     "--feed",
     help="Feed to query items from",
-    choices=['All', 'Clearance', 'Computers', 'Electronics', 'Featured', 'Home', 'Gourmet', 'Shirts', 'Sports', 'Tools', 'Wootoff'],
+    choices=['Clearance', 'Computers', 'Electronics', 'Home', 'Gourmet', 'Shirts', 'Sports', 'Tools'],
     required=True
 )
 parser.add_argument(
@@ -112,17 +112,38 @@ def send_mail(link):
         )
 
 
+def set_feed(feed):
+    
+    # TODO: There is probably a better way to do this
+    if args['feed'] == "Electronics":
+       args['feed'] = "tech"
+    elif args['feed'] == "Computers":
+       args['feed'] = "pc"
+    elif args['feed'] == "Shirts":
+       args['feed'] = "shirt"
+    elif args['feed'] == "Sports":
+       args['feed'] = "sport"
+    
+    return args['feed']
+
+
 def main():
 
     api_base_url = "https://developer.woot.com/feed/"
     api_endpoint = args['feed']
 
     # Setting our search based on args provided
-    # TODO: not all feeds return the feed name in upper case, i.e. electronics
+    # The woot API returns the following as a category
+    # BASE_FILTER/Sub_Filter
+    # So if you want to search in Home for Bedding, your filter would look like
+    # HOME/Bedding
+
+    feed = set_feed(args['feed'])
+
     if args['sub']:
-        item_filter = args['feed'].upper()+"/"+args['sub']
+        item_filter = feed.upper()+"/"+args['sub']
     else:
-        item_filter = args['feed'].upper()
+        item_filter = feed.upper()
 
     try:
         key = os.environ['WOOT_KEY']
